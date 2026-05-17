@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytica | Data Analytics Platform</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts for a modern look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Landing View -->
+    <div id="landing-view">
+        <header class="landing-header">
+            <nav class="landing-navbar">
+                <a href="#" class="logo">Analytica</a>
+                <div class="landing-nav-links">
+                    <button class="btn btn-secondary btn-small" id="nav-login-btn">Login</button>
+                    <button class="btn btn-primary btn-small" id="nav-signup-btn">Sign Up</button>
+                </div>
+            </nav>
+        </header>
+
+        <section class="landing-hero">
+            <!-- Animated Background Shapes -->
+            <div class="bg-shape shape-1"></div>
+            <div class="bg-shape shape-2"></div>
+            <div class="bg-shape shape-3"></div>
+            
+            <div class="hero-content">
+                <h1 class="animate-on-scroll">Master Your Data, Effortlessly</h1>
+                <p class="animate-on-scroll">Analytica provides powerful, intuitive dashboards for both business owners and students. Track expenses, monitor growth, and achieve your goals all in one place.</p>
+                <button class="btn btn-primary animate-on-scroll" id="hero-cta-btn" style="padding: 15px 30px; font-size: 1.1rem;">Start Your Free Journey</button>
+            </div>
+        </section>
+
+        <section class="landing-features">
+            <h2 style="text-align: center; margin-bottom: 50px; font-size: 2.5rem; color: var(--text-color);">What You'll Get <span style="color: var(--primary-color);">Inside</span></h2>
+            <div class="features-grid">
+                <div class="feature-card animate-on-scroll">
+                    <i class="fas fa-chart-line" style="font-size: 2rem; color: var(--primary-color); margin-bottom: 15px;"></i>
+                    <h3>Interactive Dashboards</h3>
+                    <p>Visualize your revenue, expenses, and growth with beautiful, real-time responsive charts.</p>
+                </div>
+                <div class="feature-card animate-on-scroll">
+                    <i class="fas fa-bullseye" style="font-size: 2rem; color: var(--primary-color); margin-bottom: 15px;"></i>
+                    <h3>Smart Goal Tracking</h3>
+                    <p>Set custom monthly expense limits and savings goals to strictly stay on top of your finances.</p>
+                </div>
+                <div class="feature-card animate-on-scroll">
+                    <i class="fas fa-file-pdf" style="font-size: 2rem; color: var(--primary-color); margin-bottom: 15px;"></i>
+                    <h3>Exportable Reports</h3>
+                    <p>Download your transaction history instantly in fully formatted, structured PDF reports.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Demo Section -->
+        <section id="demo" class="demo-section">
+            <h2>Interactive Demo</h2>
+            <p>See Analytica in action with this sample dashboard.</p>
+            <div class="dashboard-grid">
+                <div class="chart-container animate-on-scroll">
+                    <h3>Monthly Recurring Revenue (MRR)</h3>
+                    <canvas id="mrrChart"></canvas>
+                </div>
+                <div class="chart-container animate-on-scroll">
+                    <h3>New Users by Source</h3>
+                    <canvas id="userSourceChart"></canvas>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Authentication View -->
+    <div id="auth-view" class="hidden">
+        <div class="auth-container">
+            <div class="auth-card">
+                <h1 class="auth-logo">Analytica</h1>
+                <div class="auth-tabs" id="auth-tabs">
+                    <button class="auth-tab-link active" data-tab="signup">Sign Up</button>
+                    <button class="auth-tab-link" data-tab="login">Login</button>
+                </div>
+    
+                <!-- Sign Up Form -->
+                <form id="signup-form" class="auth-form active">
+                    <p>Create your account to get started.</p>
+                    <div class="form-group">
+                        <label for="signup-email">Email Address</label>
+                        <input type="email" id="signup-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-password">Password</label>
+                        <input type="password" id="signup-password" required>
+                    </div>
+                <div class="form-group">
+                    <label for="signup-username">Username</label>
+                    <input type="text" id="signup-username" required>
+                </div>
+                    <div class="form-group">
+                        <label>I am a...</label>
+                        <div class="profile-radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="profile" value="student" checked>
+                                <span>Student</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="profile" value="business">
+                                <span>Business Owner</span>
+                            </label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary full-width">Create Account</button>
+                    <p class="form-message" id="signup-message"></p>
+                </form>
+    
+                <!-- Login Form -->
+                <form id="login-form" class="auth-form">
+                    <p>Welcome back! Please log in.</p>
+                    <div class="form-group">
+                        <label for="login-identifier">Email or Username</label>
+                        <input type="text" id="login-identifier" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" required>
+                        <div class="forgot-password-link-container">
+                            <a href="#" id="show-forgot-password" class="text-link">Forgot password?</a>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary full-width">Login</button>
+                    <p class="form-message" id="login-message"></p>
+                </form>
+
+                <!-- Forgot Password Form -->
+                <form id="forgot-password-form" class="auth-form">
+                    <p>Enter your email to receive a password reset link.</p>
+                    <div class="form-group">
+                        <label for="reset-email">Email Address</label>
+                        <input type="email" id="reset-email" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary full-width">Send Reset Link</button>
+                    <div class="back-to-login-container">
+                        <a href="#" id="back-to-login" class="text-link">Back to Login</a>
+                    </div>
+                    <p class="form-message" id="reset-message"></p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading View -->
+    <div id="loading-view" class="hidden">
+        <div class="spinner"></div>
+        <p>Loading your dashboard...</p>
+    </div>
+
+    <!-- Main Application View -->
+    <div id="app-view" class="hidden">
+        <div class="dashboard-wrapper">
+            <!-- Sidebar Navigation -->
+            <aside class="sidebar">
+                <div class="logo sidebar-logo">Analytica</div>
+                <ul class="sidebar-menu">
+                    <li><a href="#dashboard" class="active"><i class="fas fa-chart-line"></i> <span data-i18n="nav_dashboard">Dashboard</span></a></li>
+                    <li><a href="#features"><i class="fas fa-star"></i> <span data-i18n="nav_features">Features</span></a></li>
+                </ul>
+                <ul class="sidebar-menu sidebar-logout">
+                    <li><a href="#" id="logout-button"><i class="fas fa-sign-out-alt"></i> <span data-i18n="nav_logout">Logout</span></a></li>
+                </ul>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="dashboard-main">
+                <!-- Header -->
+                <header class="dashboard-header">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search analytics...">
+                    </div>
+                    <div class="header-actions">
+                        <div class="notification-bell">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <div class="profile-menu-container">
+                            <div class="profile-dropdown" id="profile-dropdown-btn">
+                                <div class="profile-img" id="profile-img"></div>
+                                <span id="profile-name"></span>
+                                <i class="fas fa-chevron-down profile-chevron"></i>
+                            </div>
+                            <ul class="profile-menu" id="profile-menu">
+                            <li><a href="#" id="my-profile-link"><i class="fas fa-user"></i> <span data-i18n="menu_profile">My Profile</span></a></li>
+                                <li><a href="#" id="settings-link"><i class="fas fa-cog"></i> <span data-i18n="menu_settings">Settings</span></a></li>
+                                <li class="logout-link"><a href="#" id="header-logout-btn"><i class="fas fa-sign-out-alt"></i> <span data-i18n="nav_logout">Logout</span></a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </header>
+
+                <div class="dashboard-content">
+                    <!-- Dashboard Metrics & Charts -->
+                    <section id="dashboard" class="dashboard-section">
+                        <div class="metrics-row">
+                            <div class="metric-card">
+                                <div class="metric-title" id="metric1-title" data-i18n="metric_revenue">Total Revenue</div>
+                                <div class="metric-value" id="metric1-value">$124,500</div>
+                                <div class="sparkline-container"><canvas id="sparkline1"></canvas></div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-title" id="metric2-title" data-i18n="metric_users">Active Users</div>
+                                <div class="metric-value" id="metric2-value">45,231</div>
+                                <div class="sparkline-container"><canvas id="sparkline2"></canvas></div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-title" id="metric3-title" data-i18n="metric_conversion">Conversion Rate</div>
+                                <div class="metric-value" id="metric3-value">3.24%</div>
+                                <div class="sparkline-container"><canvas id="sparkline3"></canvas></div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-title" id="metric4-title" data-i18n="metric_bounce">Bounce Rate</div>
+                                <div class="metric-value" id="metric4-value">42.1%</div>
+                                <div class="sparkline-container"><canvas id="sparkline4"></canvas></div>
+                            </div>
+                        </div>
+
+                        <div class="central-chart-section">
+                            <h3 style="margin-top: 0; margin-bottom: 20px;" id="main-chart-title" data-i18n="chart_revenue">Revenue vs. Growth</h3>
+                            <div class="central-chart-container">
+                                <canvas id="revenueGrowthChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="bottom-split">
+                            <div class="chart-box">
+                                <h3 style="margin-top: 0; margin-bottom: 20px;" data-i18n="chart_traffic">Traffic Sources</h3>
+                                <div class="chart-box-container">
+                                    <canvas id="trafficSourcesChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="table-box">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                                    <div style="display: flex; align-items: center; gap: 15px;">
+                                        <h3 style="margin: 0;" data-i18n="table_title">Recent Transactions</h3>
+                                        <select id="transaction-filter" style="padding: 6px 12px; border-radius: 8px; border: 1px solid #E5E7EB; outline: none; font-family: var(--font-family); font-size: 0.85rem; background-color: var(--surface-color); color: var(--text-color); cursor: pointer;">
+                                            <option value="All">All Categories</option>
+                                            <option value="Food & Dining">Food & Dining</option>
+                                            <option value="Transportation">Transportation</option>
+                                            <option value="Housing">Housing</option>
+                                            <option value="Utilities">Utilities</option>
+                                            <option value="Entertainment">Entertainment</option>
+                                            <option value="Other">Other</option>
+                                            <option value="Income">Income (All)</option>
+                                        </select>
+                                    </div>
+                                    <div style="display: flex; gap: 10px;">
+                                        <button id="download-pdf-btn" class="btn btn-secondary btn-small"><i class="fas fa-file-download"></i> <span data-i18n="btn_download_pdf">Download PDF</span></button>
+                                        <button id="add-transaction-btn" class="btn btn-primary btn-small"><i class="fas fa-plus"></i> <span data-i18n="btn_add_trans">Add Transaction</span></button>
+                                    </div>
+                                </div>
+                                <div style="overflow-x: auto;">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th data-i18n="th_id">Transaction ID</th>
+                                                <th data-i18n="th_date">Date</th>
+                                                <th data-i18n="th_type">Type</th>
+                                                <th data-i18n="th_category">Category</th>
+                                                <th data-i18n="th_amount">Amount</th>
+                                                <th data-i18n="th_status">Status</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="transactions-tbody">
+                                            <!-- Transactions will be loaded here dynamically -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-size: 0.9rem; color: var(--secondary-color);">Showing 1 to 4 of 24 entries</span>
+                                    <div style="display: flex; gap: 10px;">
+                                        <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.9rem;">Prev</button>
+                                        <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.9rem;">Next</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+        <!-- Features Section -->
+        <section id="features" class="features-section hidden">
+            <h2 id="features-heading">Why Choose Analytica?</h2>
+            <!-- Business Features -->
+            <div class="features-grid" id="features-business">
+                <div class="feature-card animate-on-scroll interactive-card" id="feat-bus-sales">
+                    <h3>Sales & KPI Dashboards</h3>
+                    <p>Monitor your key business metrics with live, interactive dashboards that update automatically.</p>
+                </div>
+                <div class="feature-card animate-on-scroll interactive-card" id="feat-bus-crm">
+                    <h3>CRM & E-commerce Integration</h3>
+                    <p>Connect to platforms like Salesforce, Shopify, and more to centralize your business data.</p>
+                </div>
+                <div class="feature-card animate-on-scroll interactive-card" id="feat-bus-team">
+                    <h3>Team Performance Analytics</h3>
+                    <p>Share findings with your team, track performance, and collaborate on data-driven decisions.</p>
+                </div>
+            </div>
+            <!-- Student Features -->
+            <div class="features-grid hidden" id="features-student">
+                <div class="feature-card animate-on-scroll interactive-card" id="feat-stu-expense">
+                    <h3>Smart Expense Tracking</h3>
+                    <p>Easily log your daily expenses and see exactly where your money is going with automatic categorization.</p>
+                </div>
+                <div class="feature-card animate-on-scroll interactive-card" id="feat-stu-savings">
+                    <h3>Savings Goals</h3>
+                    <p>Set personal savings goals for a new laptop, a trip, or a rainy day fund and track your progress.</p>
+                </div>
+                <div class="feature-card animate-on-scroll interactive-card" id="feat-stu-overview">
+                    <h3>Monthly Overview</h3>
+                    <p>Get a simple, clear monthly breakdown of your income, spending, and savings habits.</p>
+                </div>
+            </div>
+        </section>
+
+        <footer class="main-footer">
+            <p>&copy; 2024 Analytica. All rights reserved.</p>
+        </footer>
+                </div>
+            </main>
+        </div>
+    </div>
+        <!-- Chart.js library from a CDN -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <!-- jsPDF libraries for PDF generation -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+        <!-- Our custom JavaScript file -->
+        <script src="script.js"></script>
+
+    <!-- Profile Modal -->
+    <div id="profile-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal" id="close-profile-modal">&times;</span>
+            <h2 style="margin-bottom: 20px;">Complete Your Profile</h2>
+            <form id="profile-update-form">
+                <div class="profile-pic-container">
+                    <div class="profile-pic-preview" id="modal-profile-img"></div>
+                    <input type="file" id="profile-picture-input" accept="image/*" style="display: none;">
+                    <label for="profile-picture-input" class="btn btn-secondary btn-small" style="cursor: pointer;">Upload Picture</label>
+                </div>
+                <div class="form-group">
+                    <label for="profile-email">Email Address</label>
+                    <input type="email" id="profile-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="profile-age">Age</label>
+                    <input type="number" id="profile-age" min="1" max="120">
+                </div>
+                <div class="form-group">
+                    <label for="profile-occupation">Occupation</label>
+                    <input type="text" id="profile-occupation">
+                </div>
+                <button type="submit" class="btn btn-primary full-width">Save Profile</button>
+                <p class="form-message" id="profile-update-message"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content settings-modal-content">
+            <span class="close-modal" id="close-settings-modal">&times;</span>
+            <h2 style="margin-bottom: 20px;" data-i18n="settings_title">Settings</h2>
+            
+            <div class="settings-layout">
+                <!-- Settings Sidebar -->
+                <div class="settings-sidebar">
+                    <button class="settings-tab-btn active" data-settings-tab="settings-profile" data-i18n="set_tab_profile">Profile Info</button>
+                    <button class="settings-tab-btn" data-settings-tab="settings-security" data-i18n="set_tab_security">Security</button>
+                    <button class="settings-tab-btn" data-settings-tab="settings-theme" data-i18n="set_tab_theme">Theme</button>
+                    <button class="settings-tab-btn" data-settings-tab="settings-language" data-i18n="set_tab_lang">Language</button>
+                </div>
+                
+                <!-- Settings Content -->
+                <div class="settings-content-area">
+                    <!-- Profile Info Tab -->
+                    <div id="settings-profile" class="settings-tab-content active">
+                        <h3>Profile Information</h3>
+                        <form id="settings-profile-form">
+                            <div class="profile-pic-container" style="align-items: flex-start; margin-bottom: 20px;">
+                                <div class="profile-pic-preview" id="settings-profile-img"></div>
+                                <input type="file" id="settings-picture-input" accept="image/*" style="display: none;">
+                                <label for="settings-picture-input" class="btn btn-secondary btn-small" style="cursor: pointer;">Change Picture</label>
+                            </div>
+                            <div class="form-group">
+                                <label for="setting-username">Username</label>
+                                <input type="text" id="setting-username" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="setting-name">Full Name</label>
+                                <input type="text" id="setting-name" placeholder="e.g. Jane Doe">
+                            </div>
+                            <div class="form-group">
+                                <label for="setting-email">Email Address</label>
+                                <input type="email" id="setting-email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="setting-age">Age</label>
+                                <input type="number" id="setting-age" min="1" max="120">
+                            </div>
+                            <div class="form-group">
+                                <label for="setting-mobile">Mobile Number (Optional)</label>
+                                <input type="tel" id="setting-mobile" placeholder="+1 (555) 000-0000">
+                            </div>
+                            <div class="form-group">
+                                <label for="setting-occupation">Occupation</label>
+                                <input type="text" id="setting-occupation">
+                            </div>
+                            <div class="form-group">
+                                <label for="setting-country">Country</label>
+                                <select id="setting-country">
+                                    <option value="">Select a country...</option>
+                                    <option value="US">United States</option>
+                                    <option value="GB">United Kingdom</option>
+                                    <option value="DE">Germany</option>
+                                    <option value="FR">France</option>
+                                    <option value="ES">Spain</option>
+                                    <option value="JP">Japan</option>
+                                    <option value="IN">India</option>
+                                    <option value="CN">China</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="setting-currency">Preferred Currency</label>
+                                <select id="setting-currency">
+                                    <option value="$">USD ($)</option>
+                                    <option value="€">EUR (€)</option>
+                                    <option value="£">GBP (£)</option>
+                                    <option value="¥">JPY (¥)</option>
+                                    <option value="₹">INR (₹)</option>
+                                </select>
+                            </div>
+                            <div class="form-group hidden" id="student-savings-group">
+                                <label for="setting-savings" data-i18n="metric_savings">Savings Goal</label>
+                                <input type="number" id="setting-savings" min="0" step="0.01" placeholder="e.g. 5000">
+                            </div>
+                            <div class="form-group hidden" id="student-expense-goal-group">
+                                <label for="setting-expense-goal" data-i18n="expense_goal">Monthly Expense Limit</label>
+                                <input type="number" id="setting-expense-goal" min="0" step="0.01" placeholder="e.g. 2000">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <p class="form-message" id="settings-profile-message"></p>
+                        </form>
+                    </div>
+                    
+                    <!-- Security Tab -->
+                    <div id="settings-security" class="settings-tab-content hidden">
+                        <h3>Security</h3>
+                        <div class="security-info">
+                            <p><strong>Last password change:</strong> <span id="last-password-change">Never</span></p>
+                        </div>
+                        
+                        <h4 style="margin-bottom: 10px;">Change Password</h4>
+                        <form id="settings-password-form">
+                            <div class="form-group">
+                                <label for="current-password">Current Password</label>
+                                <input type="password" id="current-password" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="new-password">New Password</label>
+                                <input type="password" id="new-password" required>
+                            </div>
+                            <button type="submit" class="btn btn-secondary">Update Password</button>
+                            <p class="form-message" id="settings-password-message"></p>
+                        </form>
+
+                        <h4 style="margin-top: 30px; margin-bottom: 10px;">Recent Login Devices</h4>
+                        <ul class="device-list">
+                            <li><i class="fas fa-desktop"></i> Current Device <br><small id="current-device-info">Today</small></li>
+                            <li><i class="fas fa-mobile-alt"></i> iPhone 13 - Safari <br><small>Yesterday, 08:15 PM</small></li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Theme Tab -->
+                    <div id="settings-theme" class="settings-tab-content hidden">
+                        <h3>Theme Preferences</h3>
+                        <div class="theme-options">
+                            <label class="radio-label">
+                                <input type="radio" name="theme-preference" value="light" checked>
+                                <span>Light Mode</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="theme-preference" value="dark">
+                                <span>Dark Mode</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Language Tab -->
+                    <div id="settings-language" class="settings-tab-content hidden">
+                        <h3>Language Selection</h3>
+                        <div class="form-group">
+                            <label for="language-select">Choose Language</label>
+                            <select id="language-select">
+                                <option value="en">English</option>
+                                <option value="es">Español (Spanish)</option>
+                                <option value="fr">Français (French)</option>
+                                <option value="de">Deutsch (German)</option>
+                                <option value="zh">中文 (Chinese)</option>
+                                <option value="ja">日本語 (Japanese)</option>
+                                <option value="hi">हिन्दी (Hindi)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction Modal -->
+    <div id="transaction-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal" id="close-transaction-modal">&times;</span>
+            <h2 id="transaction-modal-title" style="margin-bottom: 20px;">Add New Transaction</h2>
+            <form id="transaction-form">
+                <div class="form-group">
+                    <label for="trans-amount">Amount</label>
+                    <input type="number" id="trans-amount" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="trans-type" data-i18n="th_type">Type</label>
+                    <select id="trans-type" required>
+                        <option value="Expense" data-i18n="type_expense">Expense</option>
+                        <option value="Income" data-i18n="type_income">Income</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="trans-category" data-i18n="th_category">Category</label>
+                    <select id="trans-category" required>
+                        <option value="Food & Dining">Food & Dining</option>
+                        <option value="Transportation">Transportation</option>
+                        <option value="Housing">Housing</option>
+                        <option value="Utilities">Utilities</option>
+                        <option value="Entertainment">Entertainment</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="trans-date">Date</label>
+                    <input type="date" id="trans-date" required>
+                </div>
+                <div class="form-group">
+                    <label for="trans-status">Status</label>
+                    <select id="trans-status" required>
+                        <option value="Completed">Completed</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Failed">Failed</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary full-width">Save Transaction</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-confirm-modal" class="modal hidden">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <span class="close-modal" id="close-delete-modal">&times;</span>
+            <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #EF4444; margin-bottom: 15px;"></i>
+            <h2 style="margin-bottom: 15px;">Delete Transaction?</h2>
+            <p style="color: var(--secondary-color); margin-bottom: 25px;">Are you sure you want to delete this transaction? This action cannot be undone.</p>
+            <div style="display: flex; gap: 15px; justify-content: center;">
+                <button id="cancel-delete-btn" class="btn btn-secondary">Cancel</button>
+                <button id="confirm-delete-btn" class="btn btn-primary" style="background-color: #EF4444; border-color: #EF4444;">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Back to Top Button -->
+    <button id="back-to-top-btn" class="back-to-top" aria-label="Back to top">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+</body>
+</html>
