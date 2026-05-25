@@ -36,12 +36,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const profileModal = document.getElementById('profile-modal');
     const closeProfileModal = document.getElementById('close-profile-modal');
     const profileUpdateForm = document.getElementById('profile-update-form');
-    const profileEmailInput = document.getElementById('profile-email');
     const profileAgeInput = document.getElementById('profile-age');
     const profileOccupationInput = document.getElementById('profile-occupation');
     const profileUpdateMessage = document.getElementById('profile-update-message');
     const modalProfileImg = document.getElementById('modal-profile-img');
     const profilePictureInput = document.getElementById('profile-picture-input');
+
+    // --- Notification Elements ---
+    const notificationBell = document.getElementById('notification-bell');
+    const notificationMenu = document.getElementById('notification-menu');
+    const markReadBtn = document.getElementById('mark-read-btn');
 
     // --- Transaction Elements ---
     const addTransactionBtn = document.getElementById('add-transaction-btn');
@@ -68,17 +72,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingsTabBtns = document.querySelectorAll('.settings-tab-btn');
     const settingsTabContents = document.querySelectorAll('.settings-tab-content');
     
-    const settingUsername = document.getElementById('setting-username');
     const settingName = document.getElementById('setting-name');
-    const settingEmail = document.getElementById('setting-email');
     const settingAge = document.getElementById('setting-age');
     const settingMobile = document.getElementById('setting-mobile');
     const settingOccupation = document.getElementById('setting-occupation');
-    const settingCountry = document.getElementById('setting-country');
     const settingCurrency = document.getElementById('setting-currency');
     const settingSavings = document.getElementById('setting-savings');
     const studentSavingsGroup = document.getElementById('student-savings-group');
     const settingExpenseGoal = document.getElementById('setting-expense-goal');
+    const settingNotifications = document.getElementById('setting-notifications');
     const studentExpenseGoalGroup = document.getElementById('student-expense-goal-group');
     const settingsProfileImg = document.getElementById('settings-profile-img');
     const settingsPictureInput = document.getElementById('settings-picture-input');
@@ -243,6 +245,82 @@ document.addEventListener('DOMContentLoaded', () => {
         }).format(amount);
     }
 
+    // --- Utility: Format Time Ago ---
+    function formatTimeAgo(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffInSeconds = Math.floor((now - date) / 1000);
+        if (diffInSeconds < 60) return 'Just now';
+        const diffInMinutes = Math.floor(diffInSeconds / 60);
+        if (diffInMinutes < 60) return `${diffInMinutes} min ago`;
+        const diffInHours = Math.floor(diffInMinutes / 60);
+        if (diffInHours < 24) return `${diffInHours} hours ago`;
+        const diffInDays = Math.floor(diffInHours / 24);
+        return `${diffInDays} days ago`;
+    }
+
+    // --- Utility: Render Notifications ---
+    function renderNotifications(user) {
+        const notificationList = document.getElementById('notification-list');
+        const notificationBell = document.getElementById('notification-bell');
+        if (!notificationList || !notificationBell) return;
+
+        const notifs = user.notifications || [];
+        notificationList.innerHTML = '';
+
+        const hasUnread = notifs.some(n => !n.read);
+        if (hasUnread) notificationBell.classList.add('has-unread');
+        else notificationBell.classList.remove('has-unread');
+
+        if (notifs.length === 0) {
+            notificationList.innerHTML = '<li style="padding: 15px 20px; text-align: center; color: var(--secondary-color);">No notifications yet.</li>';
+            return;
+        }
+
+        notifs.forEach(notif => {
+            let iconHtml = '<i class="fas fa-arrow-down"></i>';
+            let styleStr = 'background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);';
+            
+            if (notif.type === 'income') {
+                iconHtml = '<i class="fas fa-arrow-up"></i>';
+                styleStr = 'background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);';
+            } else if (notif.type === 'system') {
+                iconHtml = '<i class="fas fa-user"></i>';
+                styleStr = 'background: rgba(168, 85, 247, 0.15); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.3);';
+            } else if (notif.type === 'budget') {
+                iconHtml = '<i class="fas fa-bullseye"></i>';
+                styleStr = 'background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3);';
+            }
+
+            const li = document.createElement('li');
+            li.className = `notification-item ${notif.read ? '' : 'unread'}`;
+            li.innerHTML = `
+                <div class="notif-icon" style="${styleStr}">${iconHtml}</div>
+                <div class="notif-content"><p><strong>${notif.title}</strong>: ${notif.message}</p><span class="notif-time">${formatTimeAgo(notif.time)}</span></div>
+            `;
+            notificationList.appendChild(li);
+        });
+    }
+
+    // --- Utility: Add Notification ---
+    function addNotification(user, type, title, message) {
+        // Intercept and stop if user has disabled notifications
+        if (user.notificationsEnabled === false) return;
+
+        if (!user.notifications) user.notifications = [];
+        user.notifications.unshift({ id: Date.now().toString(), type, title, message, time: new Date().toISOString(), read: false });
+        if (user.notifications.length > 20) user.notifications.pop(); // Keep limit to 20
+        
+        localStorage.setItem('analyticaUser', JSON.stringify(user));
+        let users = JSON.parse(localStorage.getItem('analyticaUsers')) || [];
+        const userIndex = users.findIndex(u => u.username === user.username);
+        if (userIndex !== -1) {
+            users[userIndex].notifications = user.notifications;
+            localStorage.setItem('analyticaUsers', JSON.stringify(users));
+        }
+        renderNotifications(user);
+    }
+
     function setupUI(user) {
         const profile = user.profile;
         const username = user.username || 'User';
@@ -266,16 +344,19 @@ document.addEventListener('DOMContentLoaded', () => {
         let totalExpense = 0;
         let monthlyExpense = 0;
         const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
         const txs = user.transactions || [];
         
         txs.forEach(tx => {
             const amt = parseFloat(tx.amount) || 0;
-            const txMonth = new Date(tx.date).getMonth();
+            const txDate = new Date(tx.date);
+            const txMonth = txDate.getMonth();
+            const txYear = txDate.getFullYear();
             if (tx.type === 'Income') {
                 totalIncome += amt;
             } else {
                 totalExpense += amt;
-                if (txMonth === currentMonth) {
+                if (txMonth === currentMonth && txYear === currentYear) {
                     monthlyExpense += amt;
                 }
             }
@@ -409,9 +490,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (user.expenseGoal && parseFloat(user.expenseGoal) > 0 && monthlyExpense > parseFloat(user.expenseGoal)) {
                     metric2Value.style.color = '#EF4444';
                     metric2Title.innerHTML = `<span data-i18n="metric_expenses">Monthly Expenses</span> <i class="fas fa-exclamation-circle alert-icon" style="color: #EF4444; margin-left: 5px;" title="Over Budget!"></i>`;
+                    
+                    // --- TRIGGER BUDGET ALERT NOTIFICATION ---
+                    const monthYearStr = `${currentYear}-${currentMonth}`;
+                    if (user.lastBudgetAlertMonth !== monthYearStr) {
+                        user.lastBudgetAlertMonth = monthYearStr;
+                        addNotification(user, 'budget', 'Budget Alert', `You've exceeded your monthly limit of ${curSymbol}${formatMoney(parseFloat(user.expenseGoal), curSymbol)}!`);
+                        
+                        let users = JSON.parse(localStorage.getItem('analyticaUsers')) || [];
+                        const userIndex = users.findIndex(u => u.username === user.username);
+                        if (userIndex !== -1) {
+                            users[userIndex].lastBudgetAlertMonth = monthYearStr;
+                            localStorage.setItem('analyticaUsers', JSON.stringify(users));
+                        }
+                    }
                 } else {
                     metric2Value.style.color = '';
                     metric2Title.innerHTML = `<span data-i18n="metric_expenses">Monthly Expenses</span>`;
+                    
+                    // --- RESET BUDGET ALERT FLAG ---
+                    const monthYearStr = `${currentYear}-${currentMonth}`;
+                    if (user.lastBudgetAlertMonth === monthYearStr) {
+                        user.lastBudgetAlertMonth = null;
+                        localStorage.setItem('analyticaUser', JSON.stringify(user));
+                        let users = JSON.parse(localStorage.getItem('analyticaUsers')) || [];
+                        const userIndex = users.findIndex(u => u.username === user.username);
+                        if (userIndex !== -1) {
+                            users[userIndex].lastBudgetAlertMonth = null;
+                            localStorage.setItem('analyticaUsers', JSON.stringify(users));
+                        }
+                    }
                 }
                 
                 const expensePercent = user.expenseGoal && parseFloat(user.expenseGoal) > 0 ? Math.min(100, (monthlyExpense / parseFloat(user.expenseGoal)) * 100) : 0;
@@ -476,6 +584,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderTransactions(user);
         updateMainChart(user);
         updateCategoryChart(user);
+        renderNotifications(user);
         applyLanguage(localStorage.getItem('analyticaLanguage') || 'en');
     }
 
@@ -618,9 +727,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         mainDashboardChart.data.labels = labels;
         mainDashboardChart.data.datasets[0].label = profile === 'student' ? 'Income' : 'Revenue';
-        mainDashboardChart.data.datasets[1].label = 'Expenses';
+        mainDashboardChart.data.datasets[1].label = profile === 'student' ? 'Expenses' : 'Growth';
         mainDashboardChart.data.datasets[0].data = incomeData;
         mainDashboardChart.data.datasets[1].data = expenseData;
+
+        const legendLabel1 = document.getElementById('legend-label-1');
+        const legendLabel2 = document.getElementById('legend-label-2');
+        if (legendLabel1) legendLabel1.textContent = mainDashboardChart.data.datasets[0].label;
+        if (legendLabel2) legendLabel2.textContent = mainDashboardChart.data.datasets[1].label;
+
         mainDashboardChart.update();
     }
 
@@ -723,6 +838,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = document.getElementById('signup-email').value;
         const username = document.getElementById('signup-username').value;
         const password = document.getElementById('signup-password').value;
+        const country = document.getElementById('signup-country').value;
         const profile = document.querySelector('input[name="profile"]:checked').value;
         
         let users = JSON.parse(localStorage.getItem('analyticaUsers')) || [];
@@ -736,7 +852,21 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const user = { email, username, password, profile, transactions: [], currency: '$' };
+        const countryCurrencyMap = {
+            'US': '$', 'GB': '£', 'DE': '€', 'JP': '¥', 'IN': '₹',
+            'CN': '¥', 'BR': 'R$', 'ZA': 'R', 'KR': '₩', 'ID': 'Rp',
+            'AU': '$', 'CA': '$'
+        };
+        const currency = countryCurrencyMap[country] || '$';
+
+        const user = { 
+            email, username, password, profile, country, transactions: [], 
+            notifications: [{
+                id: Date.now().toString(), type: 'system', title: 'Welcome!', 
+                message: 'Your profile is ready.', time: new Date().toISOString(), read: false
+            }], 
+            currency: currency 
+        };
         users.push(user);
         localStorage.setItem('analyticaUsers', JSON.stringify(users));
         
@@ -845,6 +975,37 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- Notification Dropdown Logic ---
+    if (notificationBell && notificationMenu) {
+        notificationBell.addEventListener('click', (e) => {
+            e.stopPropagation(); 
+            notificationMenu.classList.toggle('show');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!notificationBell.contains(e.target) && !notificationMenu.contains(e.target)) {
+                notificationMenu.classList.remove('show');
+            }
+        });
+        
+        if (markReadBtn) markReadBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            let user = JSON.parse(localStorage.getItem('analyticaUser'));
+            if (user && user.notifications) {
+                user.notifications.forEach(n => n.read = true);
+                localStorage.setItem('analyticaUser', JSON.stringify(user));
+                
+                let users = JSON.parse(localStorage.getItem('analyticaUsers')) || [];
+                const userIndex = users.findIndex(u => u.username === user.username);
+                if (userIndex !== -1) {
+                    users[userIndex].notifications = user.notifications;
+                    localStorage.setItem('analyticaUsers', JSON.stringify(users));
+                }
+                renderNotifications(user);
+            }
+        });
+    }
+
     // --- My Profile Modal Logic ---
     if (myProfileLink && profileModal) {
         myProfileLink.addEventListener('click', (e) => {
@@ -855,7 +1016,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Populate form with existing data
             const user = JSON.parse(localStorage.getItem('analyticaUser')) || {};
-            profileEmailInput.value = user.email || '';
             profileAgeInput.value = user.age || '';
             profileOccupationInput.value = user.occupation || '';
             
@@ -903,7 +1063,6 @@ document.addEventListener('DOMContentLoaded', () => {
             let user = JSON.parse(localStorage.getItem('analyticaUser'));
             if (!user) return;
             
-            user.email = profileEmailInput.value;
             user.age = profileAgeInput.value;
             user.occupation = profileOccupationInput.value;
             
@@ -970,6 +1129,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const id = `#TRX-${String(user.transactions.length + 1).padStart(3, '0')}`;
                 user.transactions.push({ id, date, type, category, amount, status });
                 showToast('Transaction added successfully!');
+
+                // Automatically add a real-time notification
+                const notifType = type === 'Income' ? 'income' : 'expense';
+                const curSymbol = user.currency || '$';
+                const formattedAmount = `${curSymbol}${formatMoney(parseFloat(amount), curSymbol)}`;
+                addNotification(user, notifType, `${type} Tracked`, `Added ${category} for ${formattedAmount}`);
             }
 
             localStorage.setItem('analyticaUser', JSON.stringify(user));
@@ -1129,9 +1294,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 rows.push([tx.id, tx.date, tx.type || '-', tx.category || '-', `"${amt}"`, tx.status]);
             });
             
-            const csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
+            // Safely generate CSV using Blob to prevent '#' from truncating the file
+            const csvString = rows.map(e => e.join(",")).join("\n");
+            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
-            link.setAttribute("href", encodeURI(csvContent));
+            link.setAttribute("href", URL.createObjectURL(blob));
             link.setAttribute("download", `${user.username}_Transactions_Report.csv`);
             document.body.appendChild(link);
             link.click();
@@ -1195,16 +1362,14 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Populate profile data
             const user = JSON.parse(localStorage.getItem('analyticaUser')) || {};
-            settingUsername.value = user.username || '';
             settingName.value = user.fullName || '';
-            settingEmail.value = user.email || '';
             settingAge.value = user.age || '';
             settingMobile.value = user.mobile || '';
             settingOccupation.value = user.occupation || '';
-            if (settingCountry) settingCountry.value = user.country || '';
             if (settingCurrency) settingCurrency.value = user.currency || '$';
             if (settingSavings) settingSavings.value = user.savingsGoal || '';
             if (settingExpenseGoal) settingExpenseGoal.value = user.expenseGoal || '';
+            if (settingNotifications) settingNotifications.checked = user.notificationsEnabled !== false; // Defaults to true
 
             // Populate profile picture inside settings
             if (settingsProfileImg) {
@@ -1281,33 +1446,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Auto-change Currency based on Country ---
-    if (settingCountry && settingCurrency) {
-        const countryCurrencyMap = {
-            'US': '$',   // US Dollars (Bowlers)
-            'GB': '£',   // British Pounds (lbs)
-            'DE': '€',   // Euros (Bureau)
-            'FR': '€',
-            'ES': '€',
-            'IT': '€',
-            'JP': '¥',   // Japanese Yen
-            'CN': '¥',   // Chinese Yuan
-            'IN': '₹',   // Indian Rupees
-            'AU': '$',   // Australian Dollars
-            'CA': '$',   // Canadian Dollars
-            'BR': 'R$',  // Brazilian Real
-            'ZA': 'R',   // South African Rand
-            'KR': '₩',   // South Korean Won
-            'ID': 'Rp'   // Indonesian Rupiah
-        };
-        settingCountry.addEventListener('change', (e) => {
-            const selectedCountry = e.target.value;
-            if (countryCurrencyMap[selectedCountry]) {
-                settingCurrency.value = countryCurrencyMap[selectedCountry];
-            }
-        });
-    }
-
     // Settings Tab Switching
     settingsTabBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1327,27 +1465,14 @@ document.addEventListener('DOMContentLoaded', () => {
             let users = JSON.parse(localStorage.getItem('analyticaUsers')) || [];
             
             if (user) {
-                const oldUsername = user.username;
-                const newUsername = settingUsername.value;
-                
-                // Check if new username is already taken by someone else
-                if (newUsername !== oldUsername && users.some(u => u.username === newUsername)) {
-                    settingsProfileMessage.style.color = '#EF4444';
-                    settingsProfileMessage.textContent = 'Username is already taken.';
-                    setTimeout(() => { settingsProfileMessage.textContent = ''; }, 2000);
-                    return;
-                }
-                
-                user.username = newUsername;
                 user.fullName = settingName.value;
-                user.email = settingEmail.value;
                 user.age = settingAge.value;
                 user.mobile = settingMobile.value;
                 user.occupation = settingOccupation.value;
-                if (settingCountry) user.country = settingCountry.value;
                 if (settingCurrency) user.currency = settingCurrency.value;
                 user.savingsGoal = settingSavings.value;
                 user.expenseGoal = settingExpenseGoal.value;
+                if (settingNotifications) user.notificationsEnabled = settingNotifications.checked;
                 
                 // Save Profile Picture from settings
                 if (settingsProfileImg && settingsProfileImg.dataset.tempImage) {
@@ -1356,7 +1481,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 localStorage.setItem('analyticaUser', JSON.stringify(user));
                 
-                const userIndex = users.findIndex(u => u.username === oldUsername);
+                const userIndex = users.findIndex(u => u.username === user.username);
                 if (userIndex !== -1) {
                     users[userIndex] = {...users[userIndex], ...user};
                     localStorage.setItem('analyticaUsers', JSON.stringify(users));
@@ -1534,6 +1659,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initialize();
 
+    // --- Global Chart.js Dark Mode Defaults ---
+    Chart.defaults.color = '#94a3b8'; // Soft slate text
+    Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.05)'; // Subtle grid lines
+    Chart.defaults.font.family = "'Inter', sans-serif";
+
     // --- Demo Section Charts ---
     const mrrChart = new Chart(document.getElementById('mrrChart'), {
         type: 'line', // Type of chart
@@ -1542,9 +1672,9 @@ document.addEventListener('DOMContentLoaded', () => {
             datasets: [{
                 label: 'MRR ($)',
                 data: [12000, 13500, 13000, 15000, 17500, 18000, 21000, 23000],
-                backgroundColor: 'rgba(79, 70, 229, 0.1)', // Area color
-                borderColor: 'rgba(79, 70, 229, 1)', // Line color
-                borderWidth: 2,
+                backgroundColor: 'rgba(168, 85, 247, 0.2)', // Neon purple area
+                borderColor: '#a855f7', // Neon purple line
+                borderWidth: 3,
                 fill: true, // Fill the area under the line
                 tension: 0.4 // Makes the line smooth
             }]
@@ -1579,18 +1709,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 label: 'New Users',
                 data: [300, 250, 150, 100],
                 backgroundColor: [
-                    'rgba(79, 70, 229, 1)',
-                    'rgba(59, 130, 246, 1)',
-                    'rgba(16, 185, 129, 1)',
-                    'rgba(249, 115, 22, 1)'
+                    '#a855f7', // Purple
+                    '#ec4899', // Pink
+                    '#3b82f6', // Blue
+                    '#14b8a6'  // Cyan
                 ],
+                borderColor: 'rgba(9, 9, 11, 1)',
+                borderWidth: 2,
                 hoverOffset: 4
             }]
         },
+        plugins: [window.ChartDataLabels],
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
+                datalabels: {
+                    color: '#f8fafc',
+                    font: { weight: 'bold', size: 12 },
+                    formatter: (value, ctx) => {
+                        let sum = 0;
+                        let dataArr = ctx.chart.data.datasets[0].data;
+                        dataArr.forEach(data => { sum += data; });
+                        if (value === 0 || sum === 0) return null; // Don't show labels for empty slices
+                        
+                        // Use the slice's animated circumference for a count-up effect
+                        const meta = ctx.chart.getDatasetMeta(ctx.datasetIndex);
+                        const arc = meta.data[ctx.dataIndex];
+                        if (arc && arc.circumference) {
+                            const percentage = (arc.circumference / (2 * Math.PI)) * 100;
+                            if (percentage < 0.5) return null; // Hide text while the slice is just starting to draw
+                            return percentage.toFixed(0) + "%";
+                        }
+                        
+                        return (value * 100 / sum).toFixed(0) + "%"; // Fallback
+                    }
+                },
                 legend: {
                     position: 'bottom', // Position legend at the bottom
                 }
@@ -1611,24 +1765,88 @@ document.addEventListener('DOMContentLoaded', () => {
             elements: { point: { radius: 0 }, line: { tension: 0.4, borderWidth: 2 } }
         };
 
-        new Chart(document.getElementById('sparkline1'), { type: 'line', data: { labels: [1,2,3,4,5,6,7], datasets: [{ data: [12,19,15,25,22,30,28], borderColor: '#10B981' }] }, options: sparklineOptions });
-        new Chart(document.getElementById('sparkline2'), { type: 'line', data: { labels: [1,2,3,4,5,6,7], datasets: [{ data: [5,12,8,15,20,18,25], borderColor: '#4F46E5' }] }, options: sparklineOptions });
-        new Chart(document.getElementById('sparkline3'), { type: 'line', data: { labels: [1,2,3,4,5,6,7], datasets: [{ data: [2.5,2.8,3.0,3.1,3.2,3.1,3.24], borderColor: '#F59E0B' }] }, options: sparklineOptions });
-        new Chart(document.getElementById('sparkline4'), { type: 'line', data: { labels: [1,2,3,4,5,6,7], datasets: [{ data: [45,44,43,44,42.5,42.2,42.1], borderColor: '#EF4444' }] }, options: sparklineOptions });
+        new Chart(document.getElementById('sparkline1'), { type: 'line', data: { labels: [1,2,3,4,5,6,7], datasets: [{ data: [12,19,15,25,22,30,28], borderColor: '#a855f7' }] }, options: sparklineOptions });
+        new Chart(document.getElementById('sparkline2'), { type: 'line', data: { labels: [1,2,3,4,5,6,7], datasets: [{ data: [5,12,8,15,20,18,25], borderColor: '#ec4899' }] }, options: sparklineOptions });
+        new Chart(document.getElementById('sparkline3'), { type: 'line', data: { labels: [1,2,3,4,5,6,7], datasets: [{ data: [2.5,2.8,3.0,3.1,3.2,3.1,3.24], borderColor: '#3b82f6' }] }, options: sparklineOptions });
+        new Chart(document.getElementById('sparkline4'), { type: 'line', data: { labels: [1,2,3,4,5,6,7], datasets: [{ data: [45,44,43,44,42.5,42.2,42.1], borderColor: '#14b8a6' }] }, options: sparklineOptions });
 
         mainDashboardChart = new Chart(document.getElementById('revenueGrowthChart'), {
             type: 'line',
             data: {
                 labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                 datasets: [
-                    { label: 'Revenue', data: [65000, 59000, 80000, 81000, 56000, 95000, 110000, 105000, 120000, 124500, 130000, 142000], borderColor: '#4F46E5', backgroundColor: 'rgba(79, 70, 229, 0.1)', fill: true, tension: 0.4 },
-                    { label: 'Growth', data: [28000, 48000, 40000, 19000, 86000, 27000, 90000, 85000, 75000, 95000, 102000, 115000], borderColor: '#10B981', backgroundColor: 'transparent', borderDash: [5, 5], tension: 0.4 }
+                    { 
+                        label: 'Revenue', 
+                        data: [65000, 59000, 80000, 81000, 56000, 95000, 110000, 105000, 120000, 124500, 130000, 142000], 
+                        borderColor: '#a855f7', 
+                        backgroundColor: (context) => {
+                            if (!context.chart.chartArea) return 'transparent';
+                            const { ctx, chartArea: { top, bottom } } = context.chart;
+                            const gradient = ctx.createLinearGradient(0, top, 0, bottom);
+                            gradient.addColorStop(0, 'rgba(168, 85, 247, 0.6)');
+                            gradient.addColorStop(1, 'rgba(168, 85, 247, 0.0)');
+                            return gradient;
+                        }, 
+                        borderWidth: 3, 
+                        fill: true, 
+                        tension: 0.4,
+                        pointBackgroundColor: '#09090b',
+                        pointBorderColor: '#a855f7',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 7,
+                        pointHoverBackgroundColor: '#a855f7',
+                        pointHoverBorderColor: '#fff',
+                        pointHoverBorderWidth: 2
+                    },
+                    { 
+                        label: 'Growth', 
+                        data: [28000, 48000, 40000, 19000, 86000, 27000, 90000, 85000, 75000, 95000, 102000, 115000], 
+                        borderColor: '#ec4899', 
+                        borderWidth: 3, 
+                        backgroundColor: (context) => {
+                            if (!context.chart.chartArea) return 'transparent';
+                            const { ctx, chartArea: { top, bottom } } = context.chart;
+                            const gradient = ctx.createLinearGradient(0, top, 0, bottom);
+                            gradient.addColorStop(0, 'rgba(236, 72, 153, 0.6)');
+                            gradient.addColorStop(1, 'rgba(236, 72, 153, 0.0)');
+                            return gradient;
+                        }, 
+                        fill: true, 
+                        tension: 0.4,
+                        pointBackgroundColor: '#09090b',
+                        pointBorderColor: '#ec4899',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 7,
+                        pointHoverBackgroundColor: '#ec4899',
+                        pointHoverBorderColor: '#fff',
+                        pointHoverBorderWidth: 2
+                    }
                 ]
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
                 interaction: { mode: 'index', intersect: false },
-                plugins: { tooltip: { padding: 10 } }
+                plugins: { 
+                    tooltip: { 
+                        padding: 15,
+                        backgroundColor: 'rgba(9, 9, 11, 0.95)',
+                        titleColor: '#f8fafc',
+                        bodyColor: '#94a3b8',
+                        borderColor: 'rgba(255, 255, 255, 0.1)',
+                        borderWidth: 1,
+                        usePointStyle: true,
+                        boxPadding: 6
+                    },
+                    legend: {
+                        display: false // Hide default legend to use custom HTML legend
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false }, ticks: { color: '#94a3b8', padding: 10 } },
+                    y: { grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false }, ticks: { color: '#94a3b8', padding: 10 } }
+                }
             }
         });
 
@@ -1638,14 +1856,54 @@ document.addEventListener('DOMContentLoaded', () => {
                 labels: ['Food & Dining', 'Transportation', 'Housing', 'Utilities', 'Entertainment', 'Other'],
                 datasets: [{
                     data: [0, 0, 0, 0, 0, 0],
-                    backgroundColor: ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#6B7280'],
-                    borderWidth: 0, hoverOffset: 4
+                    backgroundColor: ['#a855f7', '#ec4899', '#3b82f6', '#14b8a6', '#f59e0b', '#6366f1'],
+                    borderWidth: 2, borderColor: 'rgba(9, 9, 11, 1)', hoverOffset: 4
                 }]
             },
+            plugins: [window.ChartDataLabels],
             options: { 
                 responsive: true, 
                 maintainAspectRatio: false, 
-                plugins: { legend: { position: 'bottom' } }, 
+                plugins: { 
+                    datalabels: {
+                        color: '#f8fafc',
+                        font: { weight: 'bold', size: 12 },
+                        formatter: (value, ctx) => {
+                            let sum = 0;
+                            let dataArr = ctx.chart.data.datasets[0].data;
+                            dataArr.forEach(data => { sum += data; });
+                            if (sum === 0 || value === 0) return null; // Hide 0% or empty charts
+                            
+                            // Use the slice's animated circumference for a count-up effect
+                            const meta = ctx.chart.getDatasetMeta(ctx.datasetIndex);
+                            const arc = meta.data[ctx.dataIndex];
+                            if (arc && arc.circumference) {
+                                const percentage = (arc.circumference / (2 * Math.PI)) * 100;
+                                if (percentage < 0.5) return null; // Hide text while the slice is just starting to draw
+                                return percentage.toFixed(1) + "%";
+                            }
+                            
+                            return (value * 100 / sum).toFixed(1) + "%"; // Fallback
+                        }
+                    },
+                    legend: { 
+                        position: 'bottom',
+                        labels: {
+                            color: '#94a3b8',
+                            usePointStyle: true,
+                            padding: 15
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(9, 9, 11, 0.95)',
+                        titleColor: '#f8fafc',
+                        bodyColor: '#94a3b8',
+                        borderColor: 'rgba(255, 255, 255, 0.1)',
+                        borderWidth: 1,
+                        usePointStyle: true,
+                        boxPadding: 6
+                    }
+                }, 
                 cutout: '70%',
                 onClick: (event, elements) => {
                     if (elements.length > 0) {
@@ -1719,6 +1977,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentMonthIndex = 7; // Starting from 'Aug'
 
     function updateCharts() {
+        // Pause animations if the landing page is hidden to save CPU
+        if (landingView && landingView.classList.contains('hidden')) return;
+
         // --- Update MRR Line Chart ---
         const mrrData = mrrChart.data.datasets[0].data;
         const lastMrrValue = mrrData[mrrData.length - 1];
