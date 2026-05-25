@@ -1092,9 +1092,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Transaction Form Modal Logic ---
     if (addTransactionBtn && transactionModal) {
+        const transTypeInput = document.getElementById('trans-type');
+        const transCategoryInput = document.getElementById('trans-category');
+        
+        if (transTypeInput && transCategoryInput) {
+            transTypeInput.addEventListener('change', (e) => {
+                const categoryGroup = transCategoryInput.closest('.form-group');
+                if (e.target.value === 'Income') {
+                    categoryGroup.classList.add('hidden');
+                    transCategoryInput.removeAttribute('required');
+                } else {
+                    categoryGroup.classList.remove('hidden');
+                    transCategoryInput.setAttribute('required', 'required');
+                }
+            });
+        }
+
         addTransactionBtn.addEventListener('click', () => {
             editingTransactionId = null;
             transactionForm.reset();
+            if (transTypeInput) transTypeInput.dispatchEvent(new Event('change'));
             if (transactionModalTitle) transactionModalTitle.textContent = 'Add New Transaction';
             transactionModal.classList.remove('hidden');
         });
@@ -1115,7 +1132,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const amount = document.getElementById('trans-amount').value;
             const type = document.getElementById('trans-type').value;
-            const category = document.getElementById('trans-category').value;
+            let category = document.getElementById('trans-category').value;
+            if (type === 'Income') category = '-';
             const date = document.getElementById('trans-date').value;
             const status = document.getElementById('trans-status').value;
 
@@ -1170,8 +1188,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const txToEdit = user.transactions.find(tx => tx.id === editingTransactionId);
                 if (txToEdit) {
                     document.getElementById('trans-amount').value = txToEdit.amount;
-                    document.getElementById('trans-type').value = txToEdit.type || 'Expense';
-                    document.getElementById('trans-category').value = txToEdit.category || 'Other';
+                    
+                    const transTypeInput = document.getElementById('trans-type');
+                    transTypeInput.value = txToEdit.type || 'Expense';
+                    transTypeInput.dispatchEvent(new Event('change'));
+
+                    document.getElementById('trans-category').value = (txToEdit.category && txToEdit.category !== '-') ? txToEdit.category : 'Other';
                     document.getElementById('trans-date').value = txToEdit.date;
                     document.getElementById('trans-status').value = txToEdit.status;
                     
