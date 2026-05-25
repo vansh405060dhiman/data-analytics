@@ -241,6 +241,7 @@ section {
     margin-bottom: 20px;
     background: linear-gradient(135deg, var(--primary-color) 0%, #10B981 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     font-weight: 800;
     letter-spacing: -1px;
@@ -1305,6 +1306,7 @@ body.dark-mode .bg-shape {
 body.dark-mode .landing-hero h1 {
     background: linear-gradient(135deg, #818cf8 0%, #34d399 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
