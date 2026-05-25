@@ -15,22 +15,22 @@
         /* Modern "Goated" UI Enhancements */
         :root {
             --primary-glow: rgba(124, 58, 237, 0.5);
-            --text-color: #f8fafc; /* Overrides original black text variable */
-            --secondary-color: #94a3b8; /* Overrides original gray icons variable */
         }
         
-        body {
+        body.dark-mode {
+            --text-color: #f8fafc;
+            --secondary-color: #94a3b8;
             background: #09090b !important; /* Deep modern dark mode */
             color: #f8fafc !important;
         }
 
         /* Remove legacy solid backgrounds so the dark theme applies everywhere */
-        .landing-header, .landing-features, .demo-section, .dashboard-wrapper, .features-section {
+        body.dark-mode .landing-header, body.dark-mode .landing-features, body.dark-mode .demo-section, body.dark-mode .dashboard-wrapper, body.dark-mode .features-section {
             background: transparent !important;
         }
 
         /* Animated Gradient Background */
-        .landing-hero {
+        body.dark-mode .landing-hero {
             background: linear-gradient(-45deg, #09090b, #1e1b4b, #2e1065, #09090b) !important;
             background-size: 400% 400% !important;
             animation: gradientBG 15s ease infinite !important;
@@ -68,7 +68,7 @@
         }
 
         /* Glassmorphism for Cards & Containers */
-        .feature-card, .auth-card, .metric-card, .chart-box, .table-box, .modal-content {
+        body.dark-mode .feature-card, body.dark-mode .auth-card, body.dark-mode .metric-card, body.dark-mode .chart-box, body.dark-mode .table-box, body.dark-mode .modal-content {
             background: rgba(255, 255, 255, 0.03) !important;
             backdrop-filter: blur(20px) !important;
             -webkit-backdrop-filter: blur(20px) !important;
@@ -79,7 +79,7 @@
             color: #f8fafc !important;
         }
 
-        .feature-card:hover, .metric-card:hover, .interactive-card:hover {
+        body.dark-mode .feature-card:hover, body.dark-mode .metric-card:hover, body.dark-mode .interactive-card:hover {
             transform: translateY(-10px) !important;
             box-shadow: 0 20px 40px 0 var(--primary-glow) !important;
             border-color: rgba(168, 85, 247, 0.4) !important;
@@ -103,7 +103,7 @@
         }
 
         /* Sleek Secondary Buttons (e.g. Login) */
-        .btn-secondary {
+        body.dark-mode .btn-secondary {
             background: rgba(255, 255, 255, 0.05) !important;
             border: 1px solid rgba(255, 255, 255, 0.1) !important;
             color: #f8fafc !important;
@@ -116,7 +116,7 @@
         }
 
         /* Stunning Text Gradients */
-        h1, .logo, h2 span, .auth-logo, .metric-value {
+        body.dark-mode h1, body.dark-mode .logo, body.dark-mode h2 span, body.dark-mode .auth-logo, body.dark-mode .metric-value {
             background: linear-gradient(to right, #a5b4fc, #d8b4fe, #fbcfe8) !important;
             -webkit-background-clip: text !important;
             background-clip: text !important;
@@ -130,51 +130,51 @@
             to { background-position: 200% center; }
         }
         
-        h1, h2, h3, h4, .profile-dropdown, .data-table td, .toast-message, .metric-title span { color: #f8fafc !important; }
+        body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode h4, body.dark-mode .profile-dropdown, body.dark-mode .data-table td, body.dark-mode .toast-message, body.dark-mode .metric-title span { color: #f8fafc !important; }
         /* Exclude .form-message from p tag override so dynamic success/error colors still work */
-        p:not(.form-message), label, th, li { color: #94a3b8 !important; }
+        body.dark-mode p:not(.form-message), body.dark-mode label, body.dark-mode th, body.dark-mode li { color: #94a3b8 !important; }
 
         /* Sleek Navbar and Header */
-        .landing-header, .landing-navbar, .logo, .landing-nav-links {
+        body.dark-mode .landing-header, body.dark-mode .landing-navbar, body.dark-mode .logo, body.dark-mode .landing-nav-links {
             border: none !important;
             outline: none !important;
             box-shadow: none !important;
         }
         
-        .landing-navbar, .dashboard-header {
+        body.dark-mode .landing-navbar, body.dark-mode .dashboard-header {
             background: rgba(9, 9, 11, 0.7) !important;
             backdrop-filter: blur(16px) !important;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
         }
         
         /* Sidebar Modernization */
-        .sidebar {
+        body.dark-mode .sidebar {
             background: rgba(9, 9, 11, 0.9) !important;
             backdrop-filter: blur(20px) !important;
             border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
         }
         
-        .sidebar-menu a { color: #94a3b8 !important; border-radius: 10px !important; margin: 5px 10px !important; transition: all 0.3s ease !important; }
-        .sidebar-menu a:hover, .sidebar-menu a.active {
+        body.dark-mode .sidebar-menu a { color: #94a3b8 !important; border-radius: 10px !important; margin: 5px 10px !important; transition: all 0.3s ease !important; }
+        body.dark-mode .sidebar-menu a:hover, body.dark-mode .sidebar-menu a.active {
             background: rgba(168, 85, 247, 0.15) !important;
             color: #d8b4fe !important;
             transform: translateX(5px) !important;
         }
         
         /* Profile Dropdown Menu Modernization */
-        .profile-menu {
+        body.dark-mode .profile-menu {
             background: rgba(9, 9, 11, 0.95) !important;
             backdrop-filter: blur(20px) !important;
             border: 1px solid rgba(255, 255, 255, 0.05) !important;
         }
-        .profile-menu li a { color: #f8fafc !important; }
-        .profile-menu li a:hover {
+        body.dark-mode .profile-menu li a { color: #f8fafc !important; }
+        body.dark-mode .profile-menu li a:hover {
             background: rgba(168, 85, 247, 0.15) !important;
             color: #d8b4fe !important;
         }
         
         /* Cool Premium Inputs */
-        input, select {
+        body.dark-mode input, body.dark-mode select {
             background: rgba(255, 255, 255, 0.05) !important;
             border: 1px solid rgba(255, 255, 255, 0.1) !important;
             color: #f8fafc !important;
@@ -190,29 +190,29 @@
         }
 
         /* Input Placeholders */
-        ::placeholder { color: rgba(255, 255, 255, 0.3) !important; }
+        body.dark-mode ::placeholder { color: rgba(255, 255, 255, 0.3) !important; }
         
         /* Tabs, Icons, & Links Visibility */
-        .auth-tab-link, .settings-tab-btn { color: #94a3b8 !important; }
-        .auth-tab-link.active, .settings-tab-btn.active { background: rgba(168, 85, 247, 0.15) !important; color: #d8b4fe !important; }
-        .btn-icon, .close-modal, .search-bar i { color: #94a3b8 !important; }
-        .btn-icon:hover, .close-modal:hover { color: #f8fafc !important; }
-        .text-link, .main-footer a { color: #a855f7 !important; }
+        body.dark-mode .auth-tab-link, body.dark-mode .settings-tab-btn { color: #94a3b8 !important; }
+        body.dark-mode .auth-tab-link.active, body.dark-mode .settings-tab-btn.active { background: rgba(168, 85, 247, 0.15) !important; color: #d8b4fe !important; }
+        body.dark-mode .btn-icon, body.dark-mode .close-modal, body.dark-mode .search-bar i { color: #94a3b8 !important; }
+        body.dark-mode .btn-icon:hover, body.dark-mode .close-modal:hover { color: #f8fafc !important; }
+        body.dark-mode .text-link, body.dark-mode .main-footer a { color: #a855f7 !important; }
 
         /* Toast Notifications & Security Box Visibility Fixes */
-        .toast, .security-info {
+        body.dark-mode .toast, body.dark-mode .security-info {
             background: rgba(9, 9, 11, 0.95) !important;
             backdrop-filter: blur(20px) !important;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
         }
-        .toast {
+        body.dark-mode .toast {
             border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
             border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
         }
 
         /* Fix dropdown option text visibility */
-        select option {
+        body.dark-mode select option {
             background-color: #09090b !important;
             color: #f8fafc !important;
         }
@@ -280,37 +280,37 @@
             flex-direction: column;
             z-index: 100;
         }
-        .notification-menu.show {
+        body.dark-mode .notification-menu.show {
             display: flex;
             animation: fadeIn 0.2s ease;
         }
-        .notification-header {
+        body.dark-mode .notification-header {
             padding: 15px 20px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .notification-header h4 { margin: 0; font-size: 1rem; color: #f8fafc; }
-        .notification-list {
+        body.dark-mode .notification-header h4 { margin: 0; font-size: 1rem; color: #f8fafc; }
+        body.dark-mode .notification-list {
             list-style: none; margin: 0; padding: 0;
             max-height: 300px; overflow-y: auto;
         }
-        .notification-item {
+        body.dark-mode .notification-item {
             padding: 15px 20px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             display: flex; gap: 15px; align-items: flex-start;
             transition: background 0.2s; cursor: pointer;
         }
-        .notification-item:hover { background: rgba(255, 255, 255, 0.05); }
-        .notification-item.unread { background: rgba(168, 85, 247, 0.05); }
-        .notification-item.unread:hover { background: rgba(168, 85, 247, 0.1); }
+        body.dark-mode .notification-item:hover { background: rgba(255, 255, 255, 0.05); }
+        body.dark-mode .notification-item.unread { background: rgba(168, 85, 247, 0.05); }
+        body.dark-mode .notification-item.unread:hover { background: rgba(168, 85, 247, 0.1); }
         .notif-icon {
             width: 36px; height: 36px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             flex-shrink: 0; font-size: 1rem;
         }
-        .notif-content p {
+        body.dark-mode .notif-content p {
             margin: 0 0 5px 0; font-size: 0.9rem; line-height: 1.3; color: #f8fafc !important;
         }
         .notif-content .notif-time {
@@ -573,7 +573,7 @@
                         <div class="central-chart-section">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                                 <h3 style="margin: 0;" id="main-chart-title" data-i18n="chart_revenue">Revenue vs. Growth</h3>
-                                <div id="main-chart-legend" style="display: flex; gap: 15px; font-size: 0.9rem; color: #f8fafc;">
+                                <div id="main-chart-legend" style="display: flex; gap: 15px; font-size: 0.9rem; color: var(--text-color);">
                                     <div style="display: flex; align-items: center; gap: 8px;">
                                         <span style="width: 10px; height: 10px; border-radius: 50%; background-color: #a855f7; box-shadow: 0 0 8px #a855f7;"></span>
                                         <span id="legend-label-1">Revenue</span>

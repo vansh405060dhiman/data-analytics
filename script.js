@@ -1094,6 +1094,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (addTransactionBtn && transactionModal) {
         const transTypeInput = document.getElementById('trans-type');
         const transCategoryInput = document.getElementById('trans-category');
+        const transDateInput = document.getElementById('trans-date');
+        
+        // Prevent selecting future dates in the date picker
+        if (transDateInput) {
+            const today = new Date();
+            const localDate = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+            transDateInput.setAttribute('max', localDate);
+        }
         
         if (transTypeInput && transCategoryInput) {
             transTypeInput.addEventListener('change', (e) => {
@@ -1136,6 +1144,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (type === 'Income') category = '-';
             const date = document.getElementById('trans-date').value;
             const status = document.getElementById('trans-status').value;
+
+            // Validate that the selected date is not in the future
+            const selectedDate = new Date(date);
+            const todayDate = new Date();
+            todayDate.setHours(23, 59, 59, 999); // Set to the very end of today
+            if (selectedDate > todayDate) {
+                showToast('Transactions cannot be added for future dates.', true);
+                return;
+            }
 
             if (editingTransactionId) {
                 const txIndex = user.transactions.findIndex(tx => tx.id === editingTransactionId);
@@ -1558,9 +1575,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Global Theme & Language Listeners
-    const applyTheme = (theme) => document.body.classList.toggle('dark-mode', theme === 'dark');
+    const applyTheme = (theme, isInit = false) => {
+        const isDark = theme === 'dark';
+        document.body.classList.toggle('dark-mode', isDark);
+        
+        // Set Chart defaults dynamically based on theme for maximum visibility
+        Chart.defaults.color = isDark ? '#9CA3AF' : '#4B5563';
+        Chart.defaults.borderColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+
+        if (!isInit) {
+            if (typeof mrrChart !== 'undefined') mrrChart.update();
+            if (typeof userSourceChart !== 'undefined') userSourceChart.update();
+            if (mainDashboardChart) mainDashboardChart.update();
+            if (categoryDoughnutChart) categoryDoughnutChart.update();
+        }
+    };
     const initialTheme = localStorage.getItem('analyticaTheme') || 'light';
-    applyTheme(initialTheme);
+    applyTheme(initialTheme, true);
 
     themeRadios.forEach(radio => {
         radio.addEventListener('change', (e) => {
@@ -1681,10 +1712,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initialize();
 
-    // --- Global Chart.js Dark Mode Defaults ---
-    Chart.defaults.color = '#94a3b8'; // Soft slate text
-    Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.05)'; // Subtle grid lines
+    // --- Global Chart.js Defaults (Colors set dynamically in applyTheme) ---
     Chart.defaults.font.family = "'Inter', sans-serif";
+
+    const isDarkInit = document.body.classList.contains('dark-mode');
 
     // --- Demo Section Charts ---
     const mrrChart = new Chart(document.getElementById('mrrChart'), {
@@ -1736,7 +1767,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     '#3b82f6', // Blue
                     '#14b8a6'  // Cyan
                 ],
-                borderColor: 'rgba(9, 9, 11, 1)',
+                borderColor: isDarkInit ? 'rgba(9, 9, 11, 1)' : '#ffffff',
                 borderWidth: 2,
                 hoverOffset: 4
             }]
@@ -1778,6 +1809,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function initializeDashboardCharts() {
         // Prevent re-initialization
         if (dashboardChartsInitialized || !document.getElementById('sparkline1')) return;
+        const isDark = document.body.classList.contains('dark-mode');
 
         const sparklineOptions = {
             responsive: true,
@@ -1812,7 +1844,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         borderWidth: 3, 
                         fill: true, 
                         tension: 0.4,
-                        pointBackgroundColor: '#09090b',
+                        pointBackgroundColor: isDark ? '#09090b' : '#ffffff',
                         pointBorderColor: '#a855f7',
                         pointBorderWidth: 2,
                         pointRadius: 4,
@@ -1853,9 +1885,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 plugins: { 
                     tooltip: { 
                         padding: 15,
-                        backgroundColor: 'rgba(9, 9, 11, 0.95)',
-                        titleColor: '#f8fafc',
-                        bodyColor: '#94a3b8',
+                        backgroundColor: isDark ? 'rgba(9, 9, 11, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                        titleColor: isDark ? '#f8fafc' : '#111827',
+                        bodyColor: isDark ? '#94a3b8' : '#4B5563',
                         borderColor: 'rgba(255, 255, 255, 0.1)',
                         borderWidth: 1,
                         usePointStyle: true,
@@ -1866,8 +1898,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 },
                 scales: {
-                    x: { grid: { display: false }, ticks: { color: '#94a3b8', padding: 10 } },
-                    y: { grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false }, ticks: { color: '#94a3b8', padding: 10 } }
+                    x: { grid: { display: false }, ticks: { padding: 10 } },
+                    y: { grid: { drawBorder: false }, ticks: { padding: 10 } }
                 }
             }
         });
@@ -1879,7 +1911,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 datasets: [{
                     data: [0, 0, 0, 0, 0, 0],
                     backgroundColor: ['#a855f7', '#ec4899', '#3b82f6', '#14b8a6', '#f59e0b', '#6366f1'],
-                    borderWidth: 2, borderColor: 'rgba(9, 9, 11, 1)', hoverOffset: 4
+                    borderWidth: 2, borderColor: isDark ? 'rgba(9, 9, 11, 1)' : '#ffffff', hoverOffset: 4
                 }]
             },
             plugins: [window.ChartDataLabels],
@@ -1911,15 +1943,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     legend: { 
                         position: 'bottom',
                         labels: {
-                            color: '#94a3b8',
                             usePointStyle: true,
                             padding: 15
                         }
                     },
                     tooltip: {
-                        backgroundColor: 'rgba(9, 9, 11, 0.95)',
-                        titleColor: '#f8fafc',
-                        bodyColor: '#94a3b8',
+                        backgroundColor: isDark ? 'rgba(9, 9, 11, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                        titleColor: isDark ? '#f8fafc' : '#111827',
+                        bodyColor: isDark ? '#94a3b8' : '#4B5563',
                         borderColor: 'rgba(255, 255, 255, 0.1)',
                         borderWidth: 1,
                         usePointStyle: true,
