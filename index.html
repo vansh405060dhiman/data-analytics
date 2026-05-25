@@ -536,7 +536,7 @@
                                 <i class="fas fa-chevron-down profile-chevron"></i>
                             </div>
                             <ul class="profile-menu" id="profile-menu">
-                            <li><a href="#" id="my-profile-link"><i class="fas fa-user"></i> <span data-i18n="menu_profile">My Profile</span></a></li>
+                                <li><a href="#" id="my-profile-link"><i class="fas fa-user"></i> <span data-i18n="menu_profile">My Profile</span></a></li>
                                 <li><a href="#" id="settings-link"><i class="fas fa-cog"></i> <span data-i18n="menu_settings">Settings</span></a></li>
                                 <li class="logout-link"><a href="#" id="header-logout-btn"><i class="fas fa-sign-out-alt"></i> <span data-i18n="nav_logout">Logout</span></a></li>
                             </ul>
@@ -645,56 +645,48 @@
                         </div>
                     </section>
 
-        <!-- Features Section -->
-        <section id="features" class="features-section hidden">
-            <h2 id="features-heading">Why Choose Analytica?</h2>
-            <!-- Business Features -->
-            <div class="features-grid" id="features-business">
-                <div class="feature-card animate-on-scroll interactive-card" id="feat-bus-sales">
-                    <h3>Sales & KPI Dashboards</h3>
-                    <p>Monitor your key business metrics with live, interactive dashboards that update automatically.</p>
-                </div>
-                <div class="feature-card animate-on-scroll interactive-card" id="feat-bus-crm">
-                    <h3>CRM & E-commerce Integration</h3>
-                    <p>Connect to platforms like Salesforce, Shopify, and more to centralize your business data.</p>
-                </div>
-                <div class="feature-card animate-on-scroll interactive-card" id="feat-bus-team">
-                    <h3>Team Performance Analytics</h3>
-                    <p>Share findings with your team, track performance, and collaborate on data-driven decisions.</p>
-                </div>
-            </div>
-            <!-- Student Features -->
-            <div class="features-grid hidden" id="features-student">
-                <div class="feature-card animate-on-scroll interactive-card" id="feat-stu-expense">
-                    <h3>Smart Expense Tracking</h3>
-                    <p>Easily log your daily expenses and see exactly where your money is going with automatic categorization.</p>
-                </div>
-                <div class="feature-card animate-on-scroll interactive-card" id="feat-stu-savings">
-                    <h3>Savings Goals</h3>
-                    <p>Set personal savings goals for a new laptop, a trip, or a rainy day fund and track your progress.</p>
-                </div>
-                <div class="feature-card animate-on-scroll interactive-card" id="feat-stu-overview">
-                    <h3>Monthly Overview</h3>
-                    <p>Get a simple, clear monthly breakdown of your income, spending, and savings habits.</p>
-                </div>
-            </div>
-        </section>
+                    <!-- Features Section -->
+                    <section id="features" class="features-section hidden">
+                        <h2 id="features-heading">Why Choose Analytica?</h2>
+                        <!-- Business Features -->
+                        <div class="features-grid" id="features-business">
+                            <div class="feature-card animate-on-scroll interactive-card" id="feat-bus-sales">
+                                <h3>Sales & KPI Dashboards</h3>
+                                <p>Monitor your key business metrics with live, interactive dashboards that update automatically.</p>
+                            </div>
+                            <div class="feature-card animate-on-scroll interactive-card" id="feat-bus-crm">
+                                <h3>CRM & E-commerce Integration</h3>
+                                <p>Connect to platforms like Salesforce, Shopify, and more to centralize your business data.</p>
+                            </div>
+                            <div class="feature-card animate-on-scroll interactive-card" id="feat-bus-team">
+                                <h3>Team Performance Analytics</h3>
+                                <p>Share findings with your team, track performance, and collaborate on data-driven decisions.</p>
+                            </div>
+                        </div>
+                        <!-- Student Features -->
+                        <div class="features-grid hidden" id="features-student">
+                            <div class="feature-card animate-on-scroll interactive-card" id="feat-stu-expense">
+                                <h3>Smart Expense Tracking</h3>
+                                <p>Easily log your daily expenses and see exactly where your money is going with automatic categorization.</p>
+                            </div>
+                            <div class="feature-card animate-on-scroll interactive-card" id="feat-stu-savings">
+                                <h3>Savings Goals</h3>
+                                <p>Set personal savings goals for a new laptop, a trip, or a rainy day fund and track your progress.</p>
+                            </div>
+                            <div class="feature-card animate-on-scroll interactive-card" id="feat-stu-overview">
+                                <h3>Monthly Overview</h3>
+                                <p>Get a simple, clear monthly breakdown of your income, spending, and savings habits.</p>
+                            </div>
+                        </div>
+                    </section>
 
-        <footer class="main-footer">
-            <p>&copy; 2024 Analytica. All rights reserved.</p>
-        </footer>
+                    <footer class="main-footer">
+                        <p>&copy; 2024 Analytica. All rights reserved.</p>
+                    </footer>
                 </div>
             </main>
         </div>
     </div>
-        <!-- Chart.js library from a CDN -->
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
-        <!-- jsPDF libraries for PDF generation -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-        <!-- Our custom JavaScript file -->
-        <script src="script.js"></script>
 
     <!-- Profile Modal -->
     <div id="profile-modal" class="modal hidden">
@@ -923,5 +915,14 @@
     <button id="back-to-top-btn" class="back-to-top" aria-label="Back to top">
         <i class="fas fa-arrow-up"></i>
     </button>
+
+    <!-- Chart.js library from a CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels/dist/chartjs-plugin-datalabels.min.js"></script>
+    <!-- jsPDF libraries for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <!-- Our custom JavaScript file -->
+    <script src="script.js" type="module"></script>
 </body>
 </html>

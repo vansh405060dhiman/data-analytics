@@ -1,8 +1,3 @@
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase /supabase-js@2/+esm'
-const supabaseUrl ='https://wzunnnobcmftdxwfossr.supabase .co'
-const supabaseKey ='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6dW5ubm9iY21mdGR4d2Zvc3NyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5MzQyMDksImV4cCI6MjA5NDUxMDIwOX0.Amj8MZE5mIFDUXxTPVShtzMYvLJGM_P24LzKsJGoypg'
-const supabase =createClient(supabaseUrl, supabaseKey)
-
 // Wait for the DOM to be fully loaded before running the script
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -1099,14 +1094,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (addTransactionBtn && transactionModal) {
         const transTypeInput = document.getElementById('trans-type');
         const transCategoryInput = document.getElementById('trans-category');
-        const transDateInput = document.getElementById('trans-date');
-        
-        // Prevent selecting future dates in the date picker
-        if (transDateInput) {
-            const today = new Date();
-            const localDate = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
-            transDateInput.setAttribute('max', localDate);
-        }
         
         if (transTypeInput && transCategoryInput) {
             transTypeInput.addEventListener('change', (e) => {
@@ -1149,15 +1136,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (type === 'Income') category = '-';
             const date = document.getElementById('trans-date').value;
             const status = document.getElementById('trans-status').value;
-
-            // Validate that the selected date is not in the future
-            const selectedDate = new Date(date);
-            const todayDate = new Date();
-            todayDate.setHours(23, 59, 59, 999); // Set to the very end of today
-            if (selectedDate > todayDate) {
-                showToast('Transactions cannot be added for future dates.', true);
-                return;
-            }
 
             if (editingTransactionId) {
                 const txIndex = user.transactions.findIndex(tx => tx.id === editingTransactionId);
@@ -1282,6 +1260,11 @@ document.addEventListener('DOMContentLoaded', () => {
         downloadPdfBtn.addEventListener('click', () => {
             const user = JSON.parse(localStorage.getItem('analyticaUser'));
             if (!user) return;
+            
+            if (typeof window.jspdf === 'undefined') {
+                showToast("PDF library could not be loaded. Please check your connection.", true);
+                return;
+            }
             
             const curSymbol = user.currency || '$';
             const txs = user.transactions || [];
@@ -1585,12 +1568,14 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.toggle('dark-mode', isDark);
         
         // Set Chart defaults dynamically based on theme for maximum visibility
-        Chart.defaults.color = isDark ? '#9CA3AF' : '#4B5563';
-        Chart.defaults.borderColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+        if (typeof Chart !== 'undefined') {
+            Chart.defaults.color = isDark ? '#9CA3AF' : '#4B5563';
+            Chart.defaults.borderColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+        }
 
         if (!isInit) {
-            if (typeof mrrChart !== 'undefined') mrrChart.update();
-            if (typeof userSourceChart !== 'undefined') userSourceChart.update();
+            if (typeof mrrChart !== 'undefined' && mrrChart) mrrChart.update();
+            if (typeof userSourceChart !== 'undefined' && userSourceChart) userSourceChart.update();
             if (mainDashboardChart) mainDashboardChart.update();
             if (categoryDoughnutChart) categoryDoughnutChart.update();
         }
@@ -1718,102 +1703,99 @@ document.addEventListener('DOMContentLoaded', () => {
     initialize();
 
     // --- Global Chart.js Defaults (Colors set dynamically in applyTheme) ---
-    Chart.defaults.font.family = "'Inter', sans-serif";
+    if (typeof Chart !== 'undefined') {
+        Chart.defaults.font.family = "'Inter', sans-serif";
+    }
 
     const isDarkInit = document.body.classList.contains('dark-mode');
 
     // --- Demo Section Charts ---
-    const mrrChart = new Chart(document.getElementById('mrrChart'), {
-        type: 'line', // Type of chart
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-            datasets: [{
-                label: 'MRR ($)',
-                data: [12000, 13500, 13000, 15000, 17500, 18000, 21000, 23000],
-                backgroundColor: 'rgba(168, 85, 247, 0.2)', // Neon purple area
-                borderColor: '#a855f7', // Neon purple line
-                borderWidth: 3,
-                fill: true, // Fill the area under the line
-                tension: 0.4 // Makes the line smooth
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: false, // Start y-axis near the data for better visibility
-                    ticks: {
-                        // Format ticks to show as currency
-                        callback: function(value, index, values) {
-                            return '$' + value / 1000 + 'k';
-                        }
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false // Hide the legend as it's self-explanatory
-                }
-            }
-        }
-    });
+    let mrrChart = null;
+    let userSourceChart = null;
 
-    const userSourceChart = new Chart(document.getElementById('userSourceChart'), {
-        type: 'doughnut',
-        data: {
-            labels: ['Organic Search', 'Direct', 'Referral', 'Social Media'],
-            datasets: [{
-                label: 'New Users',
-                data: [300, 250, 150, 100],
-                backgroundColor: [
-                    '#a855f7', // Purple
-                    '#ec4899', // Pink
-                    '#3b82f6', // Blue
-                    '#14b8a6'  // Cyan
-                ],
-                borderColor: isDarkInit ? 'rgba(9, 9, 11, 1)' : '#ffffff',
-                borderWidth: 2,
-                hoverOffset: 4
-            }]
-        },
-        plugins: [window.ChartDataLabels],
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                datalabels: {
-                    color: '#f8fafc',
-                    font: { weight: 'bold', size: 12 },
-                    formatter: (value, ctx) => {
-                        let sum = 0;
-                        let dataArr = ctx.chart.data.datasets[0].data;
-                        dataArr.forEach(data => { sum += data; });
-                        if (value === 0 || sum === 0) return null; // Don't show labels for empty slices
-                        
-                        // Use the slice's animated circumference for a count-up effect
-                        const meta = ctx.chart.getDatasetMeta(ctx.datasetIndex);
-                        const arc = meta.data[ctx.dataIndex];
-                        if (arc && arc.circumference) {
-                            const percentage = (arc.circumference / (2 * Math.PI)) * 100;
-                            if (percentage < 0.5) return null; // Hide text while the slice is just starting to draw
-                            return percentage.toFixed(0) + "%";
+    if (typeof Chart !== 'undefined') {
+        mrrChart = new Chart(document.getElementById('mrrChart'), {
+            type: 'line', 
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+                datasets: [{
+                    label: 'MRR ($)',
+                    data: [12000, 13500, 13000, 15000, 17500, 18000, 21000, 23000],
+                    backgroundColor: 'rgba(168, 85, 247, 0.2)', 
+                    borderColor: '#a855f7', 
+                    borderWidth: 3,
+                    fill: true, 
+                    tension: 0.4 
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false, 
+                        ticks: {
+                            callback: function(value, index, values) {
+                                return '$' + value / 1000 + 'k';
+                            }
                         }
-                        
-                        return (value * 100 / sum).toFixed(0) + "%"; // Fallback
                     }
                 },
-                legend: {
-                    position: 'bottom', // Position legend at the bottom
+                plugins: {
+                    legend: { display: false }
                 }
             }
-        }
-    });
+        });
+
+        userSourceChart = new Chart(document.getElementById('userSourceChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Organic Search', 'Direct', 'Referral', 'Social Media'],
+                datasets: [{
+                    label: 'New Users',
+                    data: [300, 250, 150, 100],
+                    backgroundColor: [ '#a855f7', '#ec4899', '#3b82f6', '#14b8a6' ],
+                    borderColor: isDarkInit ? 'rgba(9, 9, 11, 1)' : '#ffffff',
+                    borderWidth: 2,
+                    hoverOffset: 4
+                }]
+            },
+            plugins: window.ChartDataLabels ? [window.ChartDataLabels] : [],
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    datalabels: {
+                        color: '#f8fafc',
+                        font: { weight: 'bold', size: 12 },
+                        formatter: (value, ctx) => {
+                            let sum = 0;
+                            let dataArr = ctx.chart.data.datasets[0].data;
+                            dataArr.forEach(data => { sum += data; });
+                            if (value === 0 || sum === 0) return null; 
+                            
+                            const meta = ctx.chart.getDatasetMeta(ctx.datasetIndex);
+                            const arc = meta.data[ctx.dataIndex];
+                            if (arc && arc.circumference) {
+                                const percentage = (arc.circumference / (2 * Math.PI)) * 100;
+                                if (percentage < 0.5) return null; 
+                                return percentage.toFixed(0) + "%";
+                            }
+                            
+                            return (value * 100 / sum).toFixed(0) + "%"; 
+                        }
+                    },
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    }
 
     // --- Main Dashboard Charts Initialization ---
     function initializeDashboardCharts() {
         // Prevent re-initialization
         if (dashboardChartsInitialized || !document.getElementById('sparkline1')) return;
+        if (typeof Chart === 'undefined') return;
         const isDark = document.body.classList.contains('dark-mode');
 
         const sparklineOptions = {
@@ -1919,7 +1901,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     borderWidth: 2, borderColor: isDark ? 'rgba(9, 9, 11, 1)' : '#ffffff', hoverOffset: 4
                 }]
             },
-            plugins: [window.ChartDataLabels],
+            plugins: window.ChartDataLabels ? [window.ChartDataLabels] : [],
             options: { 
                 responsive: true, 
                 maintainAspectRatio: false, 
@@ -2037,6 +2019,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateCharts() {
         // Pause animations if the landing page is hidden to save CPU
         if (landingView && landingView.classList.contains('hidden')) return;
+        if (!mrrChart || !userSourceChart) return;
 
         // --- Update MRR Line Chart ---
         const mrrData = mrrChart.data.datasets[0].data;
