@@ -1,3 +1,9 @@
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = 'https://wzunnnobcmftdxwfossr.supabase.co'
+const supabaseKey = 'sb_publishable_z3ch3i_n05Z7JujEDGBD-g_IdJJJJzB'
+const supabase = createClient(supabaseUrl, supabaseKey)
+
 // Wait for the DOM to be fully loaded before running the script
 document.addEventListener('DOMContentLoaded', () => {
 
